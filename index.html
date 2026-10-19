@@ -22,14 +22,14 @@
             padding: 20px;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
         }
 
         .quiz-container {
             background-color: var(--card-bg);
             width: 100%;
-            max-width: 750px;
+            max-width: 800px;
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
@@ -38,8 +38,32 @@
         h1 {
             text-align: center;
             color: var(--primary-color);
-            font-size: 1.4rem;
-            margin-bottom: 20px;
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+        }
+
+        .score-section {
+            text-align: center;
+            font-size: 1.15rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: #eff6ff;
+            border-radius: 8px;
+            border: 2px solid #bfdbfe;
+            display: none;
+            line-height: 1.6;
+        }
+
+        .question-block {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .question-block:last-child {
+            border-bottom: none;
+            margin-bottom: 15px;
         }
 
         .question-title {
@@ -47,17 +71,19 @@
             font-weight: 600;
             margin-bottom: 15px;
             line-height: 1.5;
+            color: var(--primary-color);
         }
 
         .statement-item {
             background-color: #f1f5f9;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             padding: 12px;
             border-radius: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 10px;
+            transition: all 0.2s;
         }
 
         .statement-text {
@@ -68,12 +94,13 @@
         .btn-group {
             display: flex;
             gap: 6px;
+            flex-shrink: 0;
         }
 
         .opt-btn {
             border: 1px solid #cbd5e1;
             background-color: #fff;
-            padding: 6px 12px;
+            padding: 6px 14px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
@@ -106,29 +133,18 @@
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 12px 20px;
-            font-size: 1rem;
+            padding: 14px 20px;
+            font-size: 1.05rem;
             font-weight: 600;
             border-radius: 8px;
             cursor: pointer;
             width: 100%;
-            margin-top: 15px;
+            margin-top: 20px;
             transition: background-color 0.2s;
         }
 
         .btn:hover {
             background-color: #1d4ed8;
-        }
-
-        .btn:disabled {
-            background-color: #cbd5e1;
-            cursor: not-allowed;
-        }
-
-        .score-section {
-            text-align: center;
-            font-size: 1.2rem;
-            font-weight: bold;
         }
     </style>
 </head>
@@ -136,15 +152,15 @@
 
     <div class="quiz-container">
         <h1>Ôn Tập Đúng / Sai Công Nghệ 11 (GHK1)</h1>
-        <div id="quiz">
-            <div class="question-title" id="question-title">Đang tải...</div>
-            <div id="statements-container"></div>
-            <button class="btn" id="submit-btn" onclick="checkAnswer()" disabled>Kiểm tra đáp án</button>
-        </div>
+        
+        <div id="score-section" class="score-section"></div>
+
+        <div id="quiz-container"></div>
+
+        <button class="btn" id="submit-btn" onclick="checkAllAnswers()">Nộp bài</button>
     </div>
 
     <script>
-        // Dữ liệu 18 câu Đúng - Sai trích xuất từ đề ôn tập và đáp án bạn cung cấp
         const quizData = [
             {
                 title: "Câu 1. Một trang trại bò sữa đang áp dụng phương pháp chọn lọc dựa vào chỉ tiêu năng suất (kiểm tra năng suất cá thể) để tuyển chọn bò giống.",
@@ -328,98 +344,111 @@
             }
         ];
 
-        let currentQuestion = 0;
-        let score = 0;
-        let userChoices = [null, null, null, null];
-        let isAnswered = false;
+        let userChoices = quizData.map(() => [null, null, null, null]);
+        let isSubmitted = false;
 
-        const titleEl = document.getElementById("question-title");
-        const statementsEl = document.getElementById("statements-container");
-        const submitBtn = document.getElementById("submit-btn");
+        function renderQuiz() {
+            const container = document.getElementById("quiz-container");
+            container.innerHTML = "";
 
-        function loadQuestion() {
-            isAnswered = false;
-            userChoices = [null, null, null, null];
-            submitBtn.disabled = true;
-            submitBtn.innerText = "Kiểm tra đáp án";
+            quizData.forEach((q, qIndex) => {
+                const questionBlock = document.createElement("div");
+                questionBlock.className = "question-block";
 
-            const data = quizData[currentQuestion];
-            titleEl.innerText = data.title;
-            statementsEl.innerHTML = "";
+                let statementsHTML = "";
+                q.statements.forEach((st, sIndex) => {
+                    statementsHTML += `
+                        <div class="statement-item" id="row-${qIndex}-${sIndex}">
+                            <div class="statement-text">${st}</div>
+                            <div class="btn-group">
+                                <button class="opt-btn" id="btn-${qIndex}-${sIndex}-D" onclick="selectChoice(${qIndex}, ${sIndex}, 'D')">Đúng</button>
+                                <button class="opt-btn" id="btn-${qIndex}-${sIndex}-S" onclick="selectChoice(${qIndex}, ${sIndex}, 'S')">Sai</button>
+                            </div>
+                        </div>
+                    `;
+                });
 
-            data.statements.forEach((st, idx) => {
-                const row = document.createElement("div");
-                row.className = "statement-item";
-                row.id = `row-${idx}`;
-
-                row.innerHTML = `
-                    <div class="statement-text">${st}</div>
-                    <div class="btn-group">
-                        <button class="opt-btn" id="btn-${idx}-D" onclick="selectChoice(${idx}, 'D')">Đúng</button>
-                        <button class="opt-btn" id="btn-${idx}-S" onclick="selectChoice(${idx}, 'S')">Sai</button>
-                    </div>
+                questionBlock.innerHTML = `
+                    <div class="question-title">${q.title}</div>
+                    ${statementsHTML}
                 `;
-                statementsEl.appendChild(row);
+                container.appendChild(questionBlock);
             });
         }
 
-        function selectChoice(index, choice) {
-            if (isAnswered) return;
+        function selectChoice(qIndex, sIndex, choice) {
+            if (isSubmitted) return;
 
-            userChoices[index] = choice;
+            userChoices[qIndex][sIndex] = choice;
 
-            const btnD = document.getElementById(`btn-${index}-D`);
-            const btnS = document.getElementById(`btn-${index}-S`);
+            const btnD = document.getElementById(`btn-${qIndex}-${sIndex}-D`);
+            const btnS = document.getElementById(`btn-${qIndex}-${sIndex}-S`);
 
             btnD.className = choice === 'D' ? 'opt-btn selected-d' : 'opt-btn';
             btnS.className = choice === 'S' ? 'opt-btn selected-s' : 'opt-btn';
-
-            // Kích hoạt nút bấm khi chọn đủ 4 ý a,b,c,d
-            if (userChoices.every(c => c !== null)) {
-                submitBtn.disabled = false;
-            }
         }
 
-        function checkAnswer() {
-            if (!isAnswered) {
-                isAnswered = true;
-                const data = quizData[currentQuestion];
-                let correctCount = 0;
+        function checkAllAnswers() {
+            let unansweredCount = 0;
+            userChoices.forEach(q => {
+                q.forEach(c => {
+                    if (c === null) unansweredCount++;
+                });
+            });
 
-                data.answers.forEach((ans, idx) => {
-                    const row = document.getElementById(`row-${idx}`);
-                    if (userChoices[idx] === ans) {
+            if (unansweredCount > 0) {
+                if (!confirm(`Bạn còn ${unansweredCount} ý chưa trả lời. Bạn có chắc chắn muốn nộp bài không?`)) {
+                    return;
+                }
+            }
+
+            isSubmitted = true;
+            let totalCorrectQuestions = 0;
+            let totalCorrectStatements = 0;
+            let totalStatements = quizData.length * 4;
+
+            quizData.forEach((q, qIndex) => {
+                let questionCorrect = true;
+                q.answers.forEach((ans, sIndex) => {
+                    const row = document.getElementById(`row-${qIndex}-${sIndex}`);
+                    const userChoice = userChoices[qIndex][sIndex];
+
+                    if (userChoice === ans) {
                         row.classList.add("correct-row");
-                        correctCount++;
+                        totalCorrectStatements++;
                     } else {
                         row.classList.add("incorrect-row");
+                        questionCorrect = false;
                     }
                 });
 
-                if (correctCount === 4) score++;
+                if (questionCorrect) {
+                    totalCorrectQuestions++;
+                }
+            });
 
-                if (currentQuestion < quizData.length - 1) {
-                    submitBtn.innerText = "Câu tiếp theo";
-                } else {
-                    submitBtn.innerText = "Xem kết quả";
-                }
-            } else {
-                currentQuestion++;
-                if (currentQuestion < quizData.length) {
-                    loadQuestion();
-                } else {
-                    document.querySelector(".quiz-container").innerHTML = `
-                        <h1>Hoàn Thành Ôn Tập!</h1>
-                        <div class="score-section">
-                            <p>Bạn đã hoàn thành chính xác ${score} / ${quizData.length} câu Đúng/Sai.</p>
-                            <button class="btn" onclick="location.reload()">Làm lại bài ôn</button>
-                        </div>
-                    `;
-                }
-            }
+            // Hiển thị kết quả điểm số
+            const scoreSection = document.getElementById("score-section");
+            scoreSection.style.display = "block";
+            scoreSection.innerHTML = `
+                🎉 <strong>Hoàn thành bài ôn!</strong><br>
+                - Số câu đúng tuyệt đối (cả 4 ý): <strong>${totalCorrectQuestions} / ${quizData.length}</strong> câu<br>
+                - Tổng số ý trả lời đúng: <strong>${totalCorrectStatements} / ${totalStatements}</strong> ý
+            `;
+
+            // Đổi nút nộp bài thành nút làm lại
+            const submitBtn = document.getElementById("submit-btn");
+            submitBtn.innerText = "Làm lại bài ôn";
+            submitBtn.onclick = function() {
+                location.reload();
+            };
+
+            // Cuộn lên đầu trang để xem điểm
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        loadQuestion();
+        renderQuiz();
     </script>
 </body>
 </html>
+ 
