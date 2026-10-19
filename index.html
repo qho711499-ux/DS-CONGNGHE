@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn Tập Đúng/Sai Công Nghệ 11 - GHK1</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --success-color: #16a34a;
+            --error-color: #dc2626;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 750px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+        }
+
+        .question-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .statement-item {
+            background-color: #f1f5f9;
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .statement-text {
+            font-size: 0.95rem;
+            flex-grow: 1;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .opt-btn {
+            border: 1px solid #cbd5e1;
+            background-color: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .opt-btn.selected-d {
+            background-color: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .opt-btn.selected-s {
+            background-color: #475569;
+            color: white;
+            border-color: #475569;
+        }
+
+        .statement-item.correct-row {
+            border: 2px solid var(--success-color);
+            background-color: #f0fdf4;
+        }
+
+        .statement-item.incorrect-row {
+            border: 2px solid var(--error-color);
+            background-color: #fef2f2;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        .score-section {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <h1>Ôn Tập Đúng / Sai Công Nghệ 11 (GHK1)</h1>
+        <div id="quiz">
+            <div class="question-title" id="question-title">Đang tải...</div>
+            <div id="statements-container"></div>
+            <button class="btn" id="submit-btn" onclick="checkAnswer()" disabled>Kiểm tra đáp án</button>
+        </div>
+    </div>
+
+    <script>
+        // Dữ liệu 18 câu Đúng - Sai trích xuất từ đề ôn tập và đáp án bạn cung cấp
+        const quizData = [
+            {
+                title: "Câu 1. Một trang trại bò sữa đang áp dụng phương pháp chọn lọc dựa vào chỉ tiêu năng suất (kiểm tra năng suất cá thể) để tuyển chọn bò giống.",
+                statements: [
+                    "a) Năng suất sữa trung bình của mỗi chu kỳ đẻ là chỉ tiêu quan trọng nhất để chọn bò sữa giống.",
+                    "b) Tỷ lệ mỡ sữa và lượng protein trong sữa cũng là các chỉ tiêu năng suất cần đánh giá.",
+                    "c) Chỉ cần đo lượng sữa trong 1 ngày duy nhất là đủ để kết luận chính xác năng suất của cả đời bò.",
+                    "d) Phương pháp kiểm tra năng suất cá thể có thể thực hiện ngay khi bò con mới sinh ra."
+                ],
+                answers: ["D", "S", "S", "S"]
+            },
+            {
+                title: "Câu 2. Anh Nam dự định mua heo nái giống về gây đàn. Anh yêu cầu người bán cung cấp sổ theo dõi gia hệ (phả hệ) của heo bố mẹ.",
+                statements: [
+                    "a) Chọn giống dựa vào phả hệ giúp hạn chế tối đa nguy cơ đồng huyết (đồng phả) khi phối giống sau này.",
+                    "b) Theo dõi lý lịch giúp người chăn nuôi chủ động tránh ghép phối giữa các cá thể có quan hệ họ hàng.",
+                    "c) Nếu heo mẹ có tiền sử đẻ ít con hoặc bị dị tật di truyền, anh Nam vẫn nên chọn vì heo con có thể tự khắc phục.",
+                    "d) Xem phả hệ giúp anh Nam biết được năng suất sinh sản (số con/lứa) của con nái mẹ trước đó."
+                ],
+                answers: ["D", "D", "S", "D"]
+            },
+            {
+                title: "Câu 3. Khi chọn bê đực giống để nuôi làm bò đực phối giống cho cả vùng, kỹ thuật viên tiến hành phương pháp kiểm tra đời sau (đánh giá qua chất lượng con cái).",
+                statements: [
+                    "a) Nếu đàn con của con bò đực đó có tốc độ tăng trọng nhanh và tỷ lệ xẻ thịt cao, bò đực đó sẽ được giữ lại làm giống.",
+                    "b) Phương pháp kiểm tra đời sau phù hợp nhất cho các hộ chăn nuôi nhỏ lẻ quy mô 1–2 con.",
+                    "c) Phương pháp này giúp chọn được đực giống tốt trong thời gian rất ngắn, chỉ mất vài tuần.",
+                    "d) Đây là phương pháp mang lại độ chính xác cao nhất trong các phương pháp chọn giống."
+                ],
+                answers: ["D", "S", "S", "D"]
+            },
+            {
+                title: "Câu 4. Trong chăn nuôi vịt siêu thịt (như vịt Super Meat), người nuôi thường áp dụng kết hợp nhiều phương pháp chọn giống để nâng cao hiệu quả kinh tế.",
+                statements: [
+                    "a) Ở giai đoạn vịt con 1 ngày tuổi, người ta chủ yếu dựa vào chọn lọc theo ngoại hình (lông bông, mắt sáng, rốn khô).",
+                    "b) Việc kết hợp chọn lọc theo ngoại hình và kiểm tra năng suất giúp nâng cao độ chính xác trong chọn giống.",
+                    "c) Chỉ cần chọn vịt giống dựa vào màu lông đẹp mà không cần quan tâm đến chỉ tiêu tiêu tốn thức ăn/kg tăng trọng.",
+                    "d) Khi vịt đạt tuổi xuất bán, trọng lượng cơ thể là chỉ tiêu năng suất quan trọng hàng đầu để chọn cá thể giữ lại làm giống."
+                ],
+                answers: ["D", "D", "S", "S"]
+            },
+            {
+                title: "Câu 5. Một hộ gia đình mua giống lợn ngoại Landrace về nuôi nhưng không chú ý đến chế độ dinh dưỡng và chuồng trại, dẫn đến lợn chậm lớn và nhiều bệnh.",
+                statements: [
+                    "a) Khi chọn giống vật nuôi, cần cân nhắc điều kiện chăm sóc và nguồn thức ăn thực tế của gia đình.",
+                    "b) Chỉ cần có giống tốt thì dù cho ăn thiếu chất lợn vẫn tăng trọng tối đa.",
+                    "c) Phương pháp chọn giống tốt có thể thay thế hoàn toàn công tác phòng dịch và vệ sinh chuồng trại.",
+                    "d) Giống quyết định năng suất tối đa, nhưng chăm sóc nuôi dưỡng giúp vật nuôi đạt được tiềm năng đó."
+                ],
+                answers: ["D", "S", "S", "D"]
+            },
+            {
+                title: "Câu 6. Để phục vụ chọn giống dê sản xuất sữa tại địa phương, cán bộ nông nghiệp hướng dẫn bà con đánh giá các đặc điểm thể hình của dê cái.",
+                statements: [
+                    "a) Nên chọn dê cái có lưng võng sâu và chân đi xiêu vẹo để dễ di chuyển trong chuồng.",
+                    "b) Đánh giá ngoại hình bầu vú nên thực hiện khi dê vừa mới vắt sữa xong để thấy rõ nhất.",
+                    "c) Dê cái có thân hình hình nón (phía sau phát triển hơn phía trước) thường là đặc điểm của dê hướng sữa tốt.",
+                    "d) Nên chọn dê cái có bầu vú phát triển, nở rộng, hai núm vú đồng đều và tĩnh mạch vú nổi rõ."
+                ],
+                answers: ["S", "S", "D", "D"]
+            },
+            {
+                title: "Câu 7. Trong công tác chọn giống thủy sản/vật nuôi hiện đại, việc ứng dụng công nghệ sinh học (như chọn lọc nhờ chỉ thị phân tử - MAS) đang dần phổ biến.",
+                statements: [
+                    "a) Chọn lọc phân tử làm thay đổi hoàn toàn hình dáng bên ngoài của vật nuôi ngay lập tức.",
+                    "b) Chi phí đầu tư cho phương pháp chọn lọc nhờ chỉ thị phân tử thường rẻ hơn nhiều so với quan sát ngoại hình.",
+                    "c) Chọn lọc bằng chỉ thị phân tử giúp phát hiện các gen quy định tính trạng tốt ngay từ giai đoạn rất sớm.",
+                    "d) Công nghệ này giúp rút ngắn thời gian chọn giống so với các phương pháp truyền thống."
+                ],
+                answers: ["S", "S", "D", "D"]
+            },
+            {
+                title: "Câu 8. Anh Bình muốn chọn mua chó nghiệp vụ/chó giữ nhà giống tốt từ một trang trại phối giống uy tín.",
+                statements: [
+                    "a) Anh nên kiểm tra giấy chứng nhận phả hệ để đảm bảo chó con không bị phối giống đồng huyết.",
+                    "b) Nên chọn những con chó con nhút nhát, luôn chui vào góc tối vì chúng sẽ hiền lành dễ dạy.",
+                    "c) Nên thử phản xạ thần kinh của chó con (như tiếng động, vật di chuyển) để đánh giá sự nhanh nhạy.",
+                    "d) Chỉ cần chó con có màu lông đẹp là chắc chắn khi lớn lên sẽ giữ nhà giỏi."
+                ],
+                answers: ["D", "S", "D", "S"]
+            },
+            {
+                title: "Câu 9. Một hộ gia đình tại vùng trung du muốn đầu tư phát triển trang trại chăn nuôi lợn với quy mô lớn, áp dụng quy trình khép kín...",
+                statements: [
+                    "a) Phương thức chăn thả tự do là lựa chọn phù hợp nhất cho mô hình quy mô lớn này...",
+                    "b) Phương thức chăn nuôi công nghiệp giúp đáp ứng tốt yêu cầu năng suất cao, kiểm soát dịch bệnh hiệu quả...",
+                    "c) Nhược điểm lớn là nguy cơ gây ô nhiễm môi trường nghiêm trọng nếu không xử lí tốt chất thải.",
+                    "d) Để khắc phục nhược điểm môi trường, trang trại có thể chuyển hẳn sang chăn thả tự do hoàn toàn..."
+                ],
+                answers: ["S", "D", "D", "S"]
+            },
+            {
+                title: "Câu 10. Anh Nam dự định mở một trang trại nuôi gà lấy trứng sạch phục vụ cho thị trường cao cấp.",
+                statements: [
+                    "a) Phương thức chăn nuôi bán công nghiệp kết hợp giữa nuôi nhốt trong chuồng và cho vật nuôi ra ngoài vận động.",
+                    "b) Sản phẩm trứng gà từ mô hình bán công nghiệp thường có chất lượng được đánh giá cao hơn...",
+                    "c) Chăn nuôi công nghiệp hoàn toàn không có sự can thiệp của công nghệ tự động hóa...",
+                    "d) Nếu muốn tối ưu hóa hoàn toàn số lượng trứng với mật độ nuôi rất cao thì chăn nuôi công nghiệp là lựa chọn phù hợp."
+                ],
+                answers: ["D", "D", "S", "D"]
+            },
+            {
+                title: "Câu 11. Khi tiến hành phân loại đàn vật nuôi của hợp tác xã để xây dựng khẩu phần ăn và kế hoạch chăm sóc riêng biệt...",
+                statements: [
+                    "a) Gà Đông Tảo và lợn Yorkshire được xếp chung vào nhóm vật nuôi bản địa...",
+                    "b) Trâu, bò thuộc nhóm gia súc có dạ dày 4 túi (nhai lại), trong khi lợn thuộc nhóm gia súc có dạ dày đơn.",
+                    "c) Dựa vào đặc tính sinh vật học, ta có thể phân chia vật nuôi thành các cặp nhóm đối lập...",
+                    "d) Việc phân loại vật nuôi theo mục đích sử dụng không có ý nghĩa gì trong việc lựa chọn phương thức chăn nuôi."
+                ],
+                answers: ["S", "D", "D", "S"]
+            },
+            {
+                title: "Câu 12. Địa phương X đang định hướng chuyển dịch cơ cấu ngành chăn nuôi theo xu hướng phát triển bền vững...",
+                statements: [
+                    "a) Đảm bảo vật nuôi được nuôi dưỡng, chăm sóc tốt trong điều kiện không bị ngược đãi...",
+                    "b) Chỉ chú trọng tối đa hóa lợi nhuận kinh tế trước mắt mà không cần quan tâm tác động môi trường.",
+                    "c) Cung cấp cho thị trường nguồn thực phẩm đạt tiêu chuẩn chất lượng cao, an toàn vệ sinh...",
+                    "d) Giải quyết hài hòa lợi ích giữa các bên bao gồm người chăn nuôi, người tiêu dùng, bảo vệ môi trường..."
+                ],
+                answers: ["D", "S", "D", "D"]
+            },
+            {
+                title: "Câu 13. Một doanh nghiệp nông nghiệp công nghệ cao đang xây dựng mô hình 'chăn nuôi thông minh' cho trang trại bò sữa.",
+                statements: [
+                    "a) Mô hình chỉ tập trung áp dụng duy nhất một thiết bị cảm biến nhiệt độ đơn lẻ...",
+                    "b) Ứng dụng các công nghệ, thiết bị và giải pháp tiên tiến nhằm nâng cao hiệu quả quản lý...",
+                    "c) Xây dựng và liên kết theo chuỗi chăn nuôi khép kín từ trang trại đến bàn ăn...",
+                    "d) Giải pháp chăn nuôi thông minh đòi hỏi phải có tính khả thi cao, phù hợp với điều kiện kinh tế..."
+                ],
+                answers: ["S", "D", "D", "D"]
+            },
+            {
+                title: "Câu 14. Xét về các yếu tố kinh tế và kỹ thuật khi áp dụng phương thức chăn thả tự do tại các hộ gia đình vùng cao:",
+                statements: [
+                    "a) Phương thức này đòi hỏi người chăn nuôi phải xây dựng hệ thống chuồng trại kiên cố...",
+                    "b) Ưu điểm lớn nhất của phương thức chăn thả tự do là chi phí đầu tư ban đầu thấp...",
+                    "c) Do vật nuôi đi lại tự do nên năng suất chăn nuôi thường rất cao và không bao giờ xảy ra dịch bệnh...",
+                    "d) Nhược điểm của chăn thả tự do là khó kiểm soát an toàn sinh học, dễ làm lây lan dịch bệnh..."
+                ],
+                answers: ["S", "D", "S", "D"]
+            },
+            {
+                title: "Câu 15. Khi phân tích sự khác biệt về chất lượng sản phẩm giữa các phương thức chăn nuôi...",
+                statements: [
+                    "a) Gà nuôi theo phương thức công nghiệp thường có thời gian sinh trưởng ngắn, mật độ cao...",
+                    "b) Gà nuôi theo phương thức bán công nghiệp có chất lượng thịt dai và thơm ngon hơn...",
+                    "c) Phương thức chăn thả tự do luôn tạo ra sản lượng thịt lớn gấp nhiều lần so với chăn nuôi công nghiệp...",
+                    "d) Người tiêu dùng hiện đại có xu hướng ưa chuộng sản phẩm từ mô hình chăn nuôi bền vững..."
+                ],
+                answers: ["D", "D", "S", "D"]
+            },
+            {
+                title: "Câu 16. Nhà trường tổ chức cho học sinh đi thực tế tại một trang trại chăn nuôi lợn công nghiệp quy mô lớn.",
+                statements: [
+                    "a) Trang trại thường được xây dựng ở ngay trung tâm khu dân cư đông đúc...",
+                    "b) Hệ thống quạt thông gió, làm mát và máng ăn tự động được vận hành liên tục...",
+                    "c) Việc kiểm soát người và phương tiện ra vào trang trại được thực hiện vô cùng ngặt nghèo...",
+                    "d) Chất thải rắn và nước thải từ trang trại nếu xả thẳng ra môi trường sẽ gây ô nhiễm nghiêm trọng."
+                ],
+                answers: ["S", "D", "D", "D"]
+            },
+            {
+                title: "Câu 17. Trong giờ thảo luận nhóm về nội dung 'Phân loại vật nuôi theo đặc tính sinh vật học'...",
+                statements: [
+                    "a) Cá trắm cỏ, tôm sú được xếp vào nhóm vật nuôi dưới nước.",
+                    "b) Gà, vịt, ngan được xếp vào nhóm gia cầm...",
+                    "c) Trâu, bò, lợn được xếp vào nhóm gia súc đẻ trứng.",
+                    "d) Việc phân nhóm vật nuôi giúp người chăn nuôi dễ dàng thiết kế kiểu chuồng nuôi..."
+                ],
+                answers: ["D", "D", "S", "D"]
+            },
+            {
+                title: "Câu 18. Khi đánh giá về xu hướng phát triển tất yếu của ngành chăn nuôi hiện đại ở nước ta...",
+                statements: [
+                    "a) Chăn nuôi nông hộ nhỏ lẻ, tự phát sẽ tiếp tục được khuyến khích mở rộng không giới hạn...",
+                    "b) Chăn nuôi thông minh kết hợp công nghệ số, IoT và tự động hóa sẽ giúp giảm sức lao động...",
+                    "c) Phát triển chăn nuôi phải gắn liền với trách nhiệm xã hội, bảo vệ môi trường...",
+                    "d) Việc ứng dụng công nghệ sinh học và quy trình VietGAP là chìa khóa tạo ra sản phẩm an toàn..."
+                ],
+                answers: ["S", "D", "D", "D"]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let userChoices = [null, null, null, null];
+        let isAnswered = false;
+
+        const titleEl = document.getElementById("question-title");
+        const statementsEl = document.getElementById("statements-container");
+        const submitBtn = document.getElementById("submit-btn");
+
+        function loadQuestion() {
+            isAnswered = false;
+            userChoices = [null, null, null, null];
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Kiểm tra đáp án";
+
+            const data = quizData[currentQuestion];
+            titleEl.innerText = data.title;
+            statementsEl.innerHTML = "";
+
+            data.statements.forEach((st, idx) => {
+                const row = document.createElement("div");
+                row.className = "statement-item";
+                row.id = `row-${idx}`;
+
+                row.innerHTML = `
+                    <div class="statement-text">${st}</div>
+                    <div class="btn-group">
+                        <button class="opt-btn" id="btn-${idx}-D" onclick="selectChoice(${idx}, 'D')">Đúng</button>
+                        <button class="opt-btn" id="btn-${idx}-S" onclick="selectChoice(${idx}, 'S')">Sai</button>
+                    </div>
+                `;
+                statementsEl.appendChild(row);
+            });
+        }
+
+        function selectChoice(index, choice) {
+            if (isAnswered) return;
+
+            userChoices[index] = choice;
+
+            const btnD = document.getElementById(`btn-${index}-D`);
+            const btnS = document.getElementById(`btn-${index}-S`);
+
+            btnD.className = choice === 'D' ? 'opt-btn selected-d' : 'opt-btn';
+            btnS.className = choice === 'S' ? 'opt-btn selected-s' : 'opt-btn';
+
+            // Kích hoạt nút bấm khi chọn đủ 4 ý a,b,c,d
+            if (userChoices.every(c => c !== null)) {
+                submitBtn.disabled = false;
+            }
+        }
+
+        function checkAnswer() {
+            if (!isAnswered) {
+                isAnswered = true;
+                const data = quizData[currentQuestion];
+                let correctCount = 0;
+
+                data.answers.forEach((ans, idx) => {
+                    const row = document.getElementById(`row-${idx}`);
+                    if (userChoices[idx] === ans) {
+                        row.classList.add("correct-row");
+                        correctCount++;
+                    } else {
+                        row.classList.add("incorrect-row");
+                    }
+                });
+
+                if (correctCount === 4) score++;
+
+                if (currentQuestion < quizData.length - 1) {
+                    submitBtn.innerText = "Câu tiếp theo";
+                } else {
+                    submitBtn.innerText = "Xem kết quả";
+                }
+            } else {
+                currentQuestion++;
+                if (currentQuestion < quizData.length) {
+                    loadQuestion();
+                } else {
+                    document.querySelector(".quiz-container").innerHTML = `
+                        <h1>Hoàn Thành Ôn Tập!</h1>
+                        <div class="score-section">
+                            <p>Bạn đã hoàn thành chính xác ${score} / ${quizData.length} câu Đúng/Sai.</p>
+                            <button class="btn" onclick="location.reload()">Làm lại bài ôn</button>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
